@@ -1,0 +1,125 @@
+Modeller
+
+Player --> name(str), surname(str), age(float)
+Team --> name(str), players(manytomany with Player class, blank=True), rank(float)
+
+
+modelleri yaradib admin panelden datalar elave edin
+
+1) Yeni player elave edin. Eger daxil edilen name, surname ve age-e gore data varsa hazir olan obyekti qaytarsin. Eks teqdirde yaratsin
+
+
+
+>>> new_player=Player(name="PLayer 6", surname="Residov",age=25)av
+
+
+
+
+
+2) Bir Team obyekti goturun. Ve teamdeki playerlerin yas ortalamasini tapin
+
+
+
+>>> from game.models import Player      
+>>> from game.models import Team  
+>>> from django.db.models import Avg
+>>> Team.objects.first().player.values().aggregate(avg=Avg("age"))
+
+
+
+
+
+3) Max yasi olan playerin oldugu teami ekrana cap edin
+
+
+
+>>> max_team=[]
+>>> max_player= Player.objects.order_by("age").first().name 
+>>> all=Team.objects.all()
+>>> for i in all:
+...     for j in i.player.values('name'): 
+...             if max_player in j['name']:
+...                     max_team.append(i)
+...
+>>> max_team
+[<Team: Second Team>, <Team: Fourth team>]
+
+
+
+4) Min yasi olan playerin oldugu teami ekrana cap edin
+
+
+
+>>> min_player=Player.objects.order_by("age").last().name
+>>> min_team=[]
+>>> all=Team.objects.all()
+>>> for i in all:
+...     for j in i.player.values('name'):   
+...             if min_player in j['name']: 
+...                     min_team.append(i)
+...
+>>> min_team
+[<Team: First Team>, <Team: Third Team>]
+
+
+
+
+5) Asagidakilara uygun Team filterlemek lazimdir
+
+	* adi "t" ile baslamasin
+
+		ve
+	
+	( 
+		* playerlerin yas ortalamasin 25-den boyuk olsun
+			
+			ve ya
+
+		* max yasi olan player komandada olsun
+
+	)
+
+
+
+>>> max_player= Player.objects.order_by("age").first().name 
+
+
+
+
+6) Asagidakilara uygun Player filterlemek lazimdir
+
+	(
+		* adi Hormet le baslamasin
+		
+			ve
+		
+		* soyadi Hemidov la bitmesin 
+	)
+
+		ve ya
+	
+	* yasi ortalamanin ustunde olsun
+
+
+
+
+
+
+
+
+>>> age_average = Player.objects.aggregate(avg_age=Avg('age'))['avg_age']
+>>> Player.objects.filter(Q(~Q(name__istartswith="hormet")&~Q(surname__iendwith="hemidov"))|Q(age__gt=avg_age)).values("name")
+
+
+
+
+
+7) Asagidakilara uygun Team filterlemek lazimdir
+
+	* ranki ortalama rankdan boyuk olsun
+		
+		ve
+	
+	* oyuncularin sayi 3 den kicik ve ya beraber olsun
+
+	Ve sonda ranka gore azalan sirayla duzun
